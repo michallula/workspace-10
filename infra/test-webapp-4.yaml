@@ -1,0 +1,81 @@
+---
+# Source: my-test-webapp/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: v0.1.0-my-test-webapp
+  labels:
+    helm.sh/chart: my-test-webapp-0.1.0
+    app.kubernetes.io/name: my-test-webapp
+    app.kubernetes.io/instance: v0.1.0
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: my-test-webapp/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: v0.1.0-my-test-webapp
+  labels:
+    helm.sh/chart: my-test-webapp-0.1.0
+    app.kubernetes.io/name: my-test-webapp
+    app.kubernetes.io/instance: v0.1.0
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: my-test-webapp
+    app.kubernetes.io/instance: v0.1.0
+---
+# Source: my-test-webapp/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: v0.1.0-my-test-webapp
+  labels:
+    helm.sh/chart: my-test-webapp-0.1.0
+    app.kubernetes.io/name: my-test-webapp
+    app.kubernetes.io/instance: v0.1.0
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: my-test-webapp
+      app.kubernetes.io/instance: v0.1.0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: my-test-webapp
+        app.kubernetes.io/instance: v0.1.0
+    spec:
+      serviceAccountName: v0.1.0-my-test-webapp
+      securityContext:
+        {}
+      containers:
+        - name: my-test-webapp
+          securityContext:
+            {}
+          image: "ghcr.io/michallula/test-webapp-1:v0.1.0"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {}
